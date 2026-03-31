@@ -65,6 +65,13 @@ def summarize_article(article: dict, model: str = DEFAULT_MODEL) -> dict | None:
             tokens_out=response.usage.output_tokens,
         )
 
+        # Strip markdown code fences if present (model sometimes wraps JSON)
+        if raw.startswith("```"):
+            raw = raw.split("```", 2)[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
+
         parsed = json.loads(raw)
         return parsed
 
