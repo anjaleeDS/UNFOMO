@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNFOMO</title>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="logo">UNFOMO</div>
+      <nav>
+        <button class="tab active" data-tab="today">Today</button>
+        <button class="tab" data-tab="trends">Trends</button>
+        <button class="tab" data-tab="players">Players</button>
+        <button class="tab" data-tab="emerging">Emerging</button>
+        <button class="tab" data-tab="weekly">Weekly</button>
+      </nav>
+      <div class="cost-badge" id="cost-badge">loading...</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- TODAY -->
+    <section id="tab-today" class="tab-content active">
+      <div class="section-header">
+        <h2>Today's Signal</h2>
+        <span class="subtitle" id="today-date"></span>
+      </div>
+      <div id="today-list" class="article-list"></div>
+    </section>
+
+    <!-- TRENDS -->
+    <section id="tab-trends" class="tab-content">
+      <div class="section-header">
+        <h2>Topic Trends</h2>
+        <span class="subtitle">7-day rolling window</span>
+      </div>
+      <div id="trend-chart" class="chart-container"></div>
+    </section>
+
+    <!-- PLAYERS -->
+    <section id="tab-players" class="tab-content">
+      <div class="section-header">
+        <h2>Player Velocity</h2>
+        <span class="subtitle">This week vs last week</span>
+      </div>
+      <div id="velocity-chart" class="chart-container"></div>
+    </section>
+
+    <!-- EMERGING -->
+    <section id="tab-emerging" class="tab-content">
+      <div class="section-header">
+        <h2>Emerging Signals</h2>
+        <span class="subtitle">New terms appearing for the first time</span>
+      </div>
+      <div id="emerging-list" class="article-list"></div>
+    </section>
+
+    <!-- WEEKLY -->
+    <section id="tab-weekly" class="tab-content">
+      <div class="section-header">
+        <h2>Weekly Digest</h2>
+      </div>
+      <div id="weekly-content" class="digest-content"></div>
+      <div id="weekly-chart-topic" class="chart-container"></div>
+      <div id="weekly-chart-velocity" class="chart-container"></div>
+      <div id="podcast-player"></div>
+    </section>
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
