@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "unfomo-dashboard",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "web.server"],
+      "port": 8080
+    }
+  ]
+}

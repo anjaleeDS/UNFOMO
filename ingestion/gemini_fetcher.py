@@ -6,14 +6,15 @@ import json
 import re
 from datetime import datetime, timezone
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 from config import GEMINI_API_KEY
 from db import repository as db
 from ingestion.scorer import score
 from processing.cost_tracker import log
 
-genai.configure(api_key=GEMINI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 GEMINI_MODEL = "gemini-2.0-flash"
 
@@ -59,8 +60,10 @@ def _parse_articles_from_response(text: str) -> list[dict]:
             pass
     # Fallback: ask Gemini to extract structured data
     try:
-        model = genai.GenerativeModel(GEMINI_MODEL)
-        r = model.generate_content(PARSE_PROMPT.format(text=text[:3000]))
+        r = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=PARSE_PROMPT.format(text=text[:3000]),
+        )
         match = re.search(r'\[[\s\S]*\]', r.text)
         if match:
             return json.loads(match.group())
@@ -94,11 +97,13 @@ def _run_query(query: str, cutoff_label: str) -> dict:
     )
 
     try:
-        model = genai.GenerativeModel(
-            GEMINI_MODEL,
-            tools="google_search_retrieval",  # enables grounding
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=query,
+            config=types.GenerateContentConfig(
+                tools=[types.Tool(google_search=types.GoogleSearch())],
+            ),
         )
-        response = model.generate_content(query)
         raw_text = response.text
 
         # log token usage
