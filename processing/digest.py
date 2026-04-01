@@ -10,7 +10,7 @@ import anthropic
 
 from config import ANTHROPIC_API_KEY
 from db import repository as db
-from processing.cost_tracker import log
+from processing.costs import log
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
@@ -49,7 +49,7 @@ def build_weekly_digest() -> dict | None:
     articles = db.get_recent_articles(days=7, min_significance=3)
 
     if not articles:
-        print("[digest_builder] No articles found for weekly digest.")
+        print("[digest] No articles found for weekly digest.")
         return None
 
     # Format top 15 articles for the prompt
@@ -100,11 +100,11 @@ def build_weekly_digest() -> dict | None:
             podcast_script=podcast_script,
         )
 
-        print(f"[digest_builder] Weekly digest saved (id={digest_id})")
+        print(f"[digest] Weekly digest saved (id={digest_id})")
         return {"id": digest_id, "content": narrative, "podcast_script": podcast_script}
 
     except Exception as e:
-        print(f"[digest_builder] Error: {e}")
+        print(f"[digest] Error: {e}")
         return None
 
 

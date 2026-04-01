@@ -10,12 +10,12 @@ from urllib.parse import urlparse
 from db import repository as db
 
 PORT = int(os.getenv("PORT", 8080))
-WEB_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 
 
-class Handler(SimpleHTTPRequestHandler):
+class UnfomoRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=WEB_DIR, **kwargs)
+        super().__init__(*args, directory=STATIC_DIR, **kwargs)
 
     def log_message(self, fmt, *args):
         pass  # suppress per-request logging
@@ -64,4 +64,4 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     print(f"UNFOMO dashboard → http://localhost:{PORT}")
-    HTTPServer(("", PORT), Handler).serve_forever()
+    HTTPServer(("", PORT), UnfomoRequestHandler).serve_forever()

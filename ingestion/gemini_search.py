@@ -12,15 +12,15 @@ from google.genai import types
 from config import GEMINI_API_KEY
 from db import repository as db
 from ingestion.scorer import score
-from processing.cost_tracker import log
+from processing.costs import log
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 GEMINI_MODEL = "gemini-2.0-flash"
 
-SEARCH_SOURCE_NAME = "Gemini Search"
-SEARCH_SOURCE_URL  = "gemini://search-grounding"
-SEARCH_SOURCE_TIER = 3
+GEMINI_SOURCE_NAME = "Gemini Search"
+GEMINI_SOURCE_URL  = "gemini://search-grounding"
+GEMINI_SOURCE_TIER = 3
 
 DAILY_QUERY = (
     "List the most significant AI product announcements, model releases, "
@@ -72,28 +72,28 @@ def _parse_articles_from_response(text: str) -> list[dict]:
     return []
 
 
-def fetch_today() -> dict:
+def fetch_today_via_gemini() -> dict:
     """Run today's search grounding query, store new articles."""
-    return _run_query(DAILY_QUERY, cutoff_label="today")
+    return _run_gemini_query(DAILY_QUERY, cutoff_label="today")
 
 
-def fetch_historical(period: str) -> dict:
+def fetch_historical_via_gemini(period: str) -> dict:
     """
     Fetch historical articles for a given period string.
     period example: "December 2024 and January 2025"
     """
     query = HISTORICAL_QUERY_TEMPLATE.format(period=period)
-    return _run_query(query, cutoff_label=period)
+    return _run_gemini_query(query, cutoff_label=period)
 
 
-def _run_query(query: str, cutoff_label: str) -> dict:
+def _run_gemini_query(query: str, cutoff_label: str) -> dict:
     counts = {"new": 0, "skipped": 0, "errors": 0}
 
     source_id = db.upsert_source(
-        SEARCH_SOURCE_NAME,
-        SEARCH_SOURCE_URL,
+        GEMINI_SOURCE_NAME,
+        GEMINI_SOURCE_URL,
         "gemini-search",
-        SEARCH_SOURCE_TIER,
+        GEMINI_SOURCE_TIER,
     )
 
     try:
@@ -117,7 +117,7 @@ def _run_query(query: str, cutoff_label: str) -> dict:
             )
 
     except Exception as e:
-        print(f"[gemini_fetcher] Gemini API error: {e}")
+        print(f"[gemini_search] Gemini API error: {e}")
         counts["errors"] += 1
         return counts
 
@@ -139,7 +139,7 @@ def _run_query(query: str, cutoff_label: str) -> dict:
                 except ValueError:
                     pass
 
-        eng_score = score(SEARCH_SOURCE_TIER, published_at)
+        eng_score = score(GEMINI_SOURCE_TIER, published_at)
         article_id = db.insert_article(
             source_id=source_id,
             url=url,
@@ -154,10 +154,10 @@ def _run_query(query: str, cutoff_label: str) -> dict:
         else:
             counts["skipped"] += 1
 
-    print(f"[gemini_fetcher] {cutoff_label}: {counts}")
+    print(f"[gemini_search] {cutoff_label}: {counts}")
     return counts
 
 
 if __name__ == "__main__":
-    result = fetch_today()
+    result = fetch_today_via_gemini()
     print(f"Gemini fetch complete: {result}")

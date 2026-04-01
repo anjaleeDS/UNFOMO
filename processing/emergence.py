@@ -23,11 +23,11 @@ STOPWORDS = {
     "gpt", "gpt-4", "gpt-4o", "meta", "llama", "mistral",
 }
 
-EMERGENCE_THRESHOLD = 3   # appearances in 48h to flag as emerging
+EMERGENCE_MIN_MENTIONS = 3   # appearances in 48h to flag as emerging
 MIN_TERM_LENGTH = 4       # ignore very short terms
 
 
-def _extract_terms(text: str) -> list[str]:
+def _extract_candidate_terms(text: str) -> list[str]:
     """Extract meaningful multi-word and single-word terms from text."""
     text = text.lower()
     terms = []
@@ -70,20 +70,20 @@ def run() -> list[str]:
     all_terms: list[str] = []
     for article in recent:
         text = f"{article.get('title', '')} {article.get('summary_text', '')}"
-        all_terms.extend(_extract_terms(text))
+        all_terms.extend(_extract_candidate_terms(text))
 
     counts = Counter(all_terms)
     newly_flagged = []
 
     for term, count in counts.items():
-        if count < EMERGENCE_THRESHOLD:
+        if count < EMERGENCE_MIN_MENTIONS:
             continue
         if term in known_flagged:
             continue
 
         row = db.upsert_term(term)
         # Update count to current 48h count
-        if row and row["count_48h"] >= EMERGENCE_THRESHOLD and not row["flagged_as_emerging"]:
+        if row and row["count_48h"] >= EMERGENCE_MIN_MENTIONS and not row["flagged_as_emerging"]:
             db.flag_emerging(term)
             newly_flagged.append(term)
             print(f"[emergence] 🌱 New emerging term: '{term}' ({count} mentions)")

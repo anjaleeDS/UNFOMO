@@ -1,17 +1,18 @@
 """
-Test case: The Claude Code (OpenClaw) Emergence Story
+One-time diagnostic: The Claude Code (OpenClaw) Emergence Story
 December 2024 – February 2025
 
 This validates the full pipeline using real historical data.
 UNFOMO should surface Claude Code as an emerging signal in Dec 2024 —
 the thing everyone missed until February.
 
-Run with: python test_openclaw.py
+NOT part of the daily pipeline. Run manually with:
+  python scripts/validate_emergence_detection.py
 """
 from db import repository as db
-from ingestion import gemini_fetcher
-from processing import summarizer, emergence_detector
-from processing.cost_tracker import print_summary
+from ingestion import gemini_search
+from processing import summarizer, emergence
+from processing.costs import print_summary
 
 
 def run():
@@ -24,15 +25,15 @@ def run():
 
     # Step 2: Historical fetch via Gemini Search grounding
     print("\n[2/5] Fetching December 2024 AI news (Gemini search)...")
-    dec_counts = gemini_fetcher.fetch_historical("December 2024")
+    dec_counts = gemini_search.fetch_historical_via_gemini("December 2024")
     print(f"      December: {dec_counts}")
 
     print("\n       Fetching January 2025 AI news...")
-    jan_counts = gemini_fetcher.fetch_historical("January 2025")
+    jan_counts = gemini_search.fetch_historical_via_gemini("January 2025")
     print(f"      January:  {jan_counts}")
 
     print("\n       Fetching February 2025 AI news...")
-    feb_counts = gemini_fetcher.fetch_historical("February 2025")
+    feb_counts = gemini_search.fetch_historical_via_gemini("February 2025")
     print(f"      February: {feb_counts}")
 
     # Step 3: Summarize everything
@@ -50,7 +51,7 @@ def run():
 
     # Step 4: Run emergence detection
     print("\n[4/5] Running emergence detection...")
-    new_terms = emergence_detector.run()
+    new_terms = emergence.run()
     print(f"      Flagged as emerging: {new_terms}")
 
     # Step 5: Report results
@@ -82,7 +83,7 @@ def run():
         print("  ✅ YES — 'claude code' flagged as emerging signal")
     else:
         print("  ⚠️  Not flagged yet — check article count and threshold")
-        print("     Try lowering EMERGENCE_THRESHOLD in emergence_detector.py")
+        print("     Try lowering EMERGENCE_MIN_MENTIONS in emergence.py")
 
     print_summary()
     print("\n══ Test complete ════════════════════════════════════════\n")

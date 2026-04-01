@@ -24,11 +24,11 @@ PLAYER_EMOJI = {
 SIG_EMOJI = {5: "🔴", 4: "🟠", 3: "🟡", 2: "⚪", 1: "⚫"}
 
 
-def _sig_emoji(sig):
+def _significance_emoji(sig):
     return SIG_EMOJI.get(sig, "⚪")
 
 
-def _player_emoji(player):
+def _ai_player_emoji(player):
     return PLAYER_EMOJI.get(player, "⚪")
 
 
@@ -42,17 +42,17 @@ def format_article(article, index: int) -> str:
     source = article.get("source_name") or ""
 
     lines = [
-        f"{index}\\. {_sig_emoji(sig)} [{_escape(title)}]({url})",
-        f"   {_player_emoji(player)} `{player}` · {_escape(source)}",
+        f"{index}\\. {_significance_emoji(sig)} [{_escape_markdown(title)}]({url})",
+        f"   {_ai_player_emoji(player)} `{player}` · {_escape_markdown(source)}",
     ]
     if summary:
-        lines.append(f"   _{_escape(summary)}_")
+        lines.append(f"   _{_escape_markdown(summary)}_")
     if now_what:
-        lines.append(f"   → {_escape(now_what)}")
+        lines.append(f"   → {_escape_markdown(now_what)}")
     return "\n".join(lines)
 
 
-def _escape(text: str) -> str:
+def _escape_markdown(text: str) -> str:
     """Escape MarkdownV2 special characters."""
     for ch in r"\_*[]()~`>#+-=|{}.!":
         text = text.replace(ch, f"\\{ch}")
@@ -169,7 +169,7 @@ async def cmd_player(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     if not filtered:
         await update.message.reply_text(f"No recent items for {player}.")
         return
-    lines = [f"*{_escape(player)} — last 7 days:*\n"]
+    lines = [f"*{_escape_markdown(player)} — last 7 days:*\n"]
     for i, a in enumerate(filtered, 1):
         lines.append(format_article(dict(a), i))
         lines.append("")

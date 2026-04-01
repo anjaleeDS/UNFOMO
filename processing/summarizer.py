@@ -8,7 +8,7 @@ from datetime import date
 
 from config import ANTHROPIC_API_KEY
 from db import repository as db
-from processing.cost_tracker import log, DEFAULT_MODEL
+from processing.costs import log, DEFAULT_MODEL
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 

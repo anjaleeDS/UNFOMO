@@ -4,17 +4,17 @@ Run manually: python scheduler/weekly_job.py
 Or triggered by APScheduler in scheduler/jobs.py (runs Sundays at 8am)
 """
 import asyncio
-from processing import digest_builder
+from processing import digest as digest_module
 from viz import topic_chart, velocity_chart
-from podcast import tts
+from podcast import audio
 
 
 def run():
     print("\n══ UNFOMO Weekly Job ═════════════════════════════")
 
     print("\n[1/4] Building weekly digest...")
-    digest = digest_builder.build_weekly_digest()
-    if not digest:
+    result = digest_module.build_weekly_digest()
+    if not result:
         print("      No articles found — aborting weekly job.")
         return
 
@@ -23,14 +23,14 @@ def run():
     velocity_path = velocity_chart.build_velocity_chart()
 
     print("\n[3/4] Rendering podcast audio...")
-    if digest.get("podcast_script"):
-        audio_path = tts.render_podcast(digest["podcast_script"])
+    if result.get("podcast_script"):
+        audio_path = audio.render_podcast(result["podcast_script"])
     else:
         audio_path = None
         print("      No podcast script in digest.")
 
     print("\n[4/4] Sending Telegram weekly package...")
-    from bot.telegram_bot import send_weekly
+    from bot.telegram import send_weekly
     asyncio.run(send_weekly(
         topic_chart_path=topic_path,
         velocity_chart_path=velocity_path,
