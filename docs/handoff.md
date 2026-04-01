@@ -49,13 +49,13 @@ cd "/Users/anjalee/Library/Mobile Documents/com~apple~CloudDocs/Coding/UNFOMO"
 python3 -m web.server
 
 # Run daily job manually
-python3 scheduler/daily_job.py
+python3 -m scheduler.daily_job
 
 # Start Telegram bot polling
-python3 -m bot.telegram_bot
+python3 -m bot.telegram
 
 # Run weekly job manually (generates digest + charts + podcast script)
-python3 scheduler/weekly_job.py
+python3 -m scheduler.weekly_job
 ```
 
 ---

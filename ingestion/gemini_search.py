@@ -16,7 +16,7 @@ from processing.costs import log
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = "gemini-2.5-flash-preview-04-17"
 
 GEMINI_SOURCE_NAME = "Gemini Search"
 GEMINI_SOURCE_URL  = "gemini://search-grounding"

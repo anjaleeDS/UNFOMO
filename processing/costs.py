@@ -9,7 +9,7 @@ PRICING = {
     "claude-haiku-4-5-20251001":   {"in": 0.80,  "out": 4.00},
     "claude-sonnet-4-6":           {"in": 3.00,  "out": 15.00},
     "claude-opus-4-6":             {"in": 15.00, "out": 75.00},
-    "gemini-2.0-flash":            {"in": 0.10,  "out": 0.40},
+    "gemini-2.5-flash-preview-04-17": {"in": 0.15, "out": 0.60},
     "gemini-2.5-pro":              {"in": 1.25,  "out": 5.00},
 }
 
