@@ -3,6 +3,7 @@ Claude API: summarize articles into structured JSON.
 One call per article. Uses Haiku by default (cheap + fast).
 """
 import json
+import re
 import anthropic
 from datetime import date
 
@@ -11,6 +12,10 @@ from db import repository as db
 from processing.costs import log, DEFAULT_MODEL
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+# Max content chars sent to Claude, by source tier.
+# Tier 3 articles are already Gemini summaries — they need very little context.
+CONTENT_CAP = {1: 3000, 2: 1500, 3: 300}
 
 PROMPT_TEMPLATE = """You are processing an AI industry news article for UNFOMO — a signal feed for AI power users who want to stay ahead without drowning in noise.
 
@@ -33,13 +38,23 @@ Return ONLY valid JSON, no markdown, no explanation:
 
 TIER_LABELS = {1: "official source", 2: "tech press", 3: "search-discovered"}
 
+_HTML_TAG = re.compile(r'<[^>]+>')
+_WHITESPACE = re.compile(r'\s+')
+
+
+def _clean_content(raw: str) -> str:
+    """Strip HTML tags and collapse whitespace."""
+    text = _HTML_TAG.sub(' ', raw)
+    return _WHITESPACE.sub(' ', text).strip()
+
 
 def summarize_article(article: dict, model: str = DEFAULT_MODEL) -> dict | None:
     """
     Takes a db article row, returns parsed JSON summary dict or None on failure.
     """
-    content = (article.get("raw_content") or "")[:4000]  # cap to keep tokens low
     tier = article.get("tier", 2)
+    cap = CONTENT_CAP.get(tier, 1500)
+    content = _clean_content(article.get("raw_content") or "")[:cap]
 
     prompt = PROMPT_TEMPLATE.format(
         title=article["title"],
@@ -86,7 +101,7 @@ def summarize_article(article: dict, model: str = DEFAULT_MODEL) -> dict | None:
 def process_unsummarized(batch_size: int = 50) -> dict:
     """
     Fetch unsummarized articles, run through Claude, store results.
-    Returns counts: {processed, failed, skipped}
+    Returns counts: {processed, failed}
     """
     articles = db.get_unsummarized_articles(limit=batch_size)
     counts = {"processed": 0, "failed": 0}

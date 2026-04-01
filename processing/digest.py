@@ -59,11 +59,9 @@ def build_weekly_digest() -> dict | None:
             "title":        a["title"],
             "source":       a.get("source_name", ""),
             "significance": a.get("significance"),
-            "engagement":   round(a.get("engagement_score") or 0, 2),
             "ai_player":    a.get("ai_player", "other"),
-            "summary":      a.get("summary_text", ""),
+            "summary":      (a.get("summary_text") or "")[:120],
             "now_what":     a.get("now_what", ""),
-            "url":          a.get("url", ""),
         }
         for a in top
     ]
