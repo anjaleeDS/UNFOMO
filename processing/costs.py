@@ -11,9 +11,10 @@ PRICING = {
     "claude-opus-4-6":             {"in": 15.00, "out": 75.00},
     "gemini-2.5-flash-preview-04-17": {"in": 0.15, "out": 0.60},
     "gemini-2.5-pro":              {"in": 1.25,  "out": 5.00},
+    "gpt-4o-mini":                 {"in": 0.15,  "out": 0.60},
 }
 
-DEFAULT_MODEL = "claude-haiku-4-5-20251001"  # cheapest for daily summarization
+DEFAULT_MODEL = "gpt-4o-mini"  # temporary while Claude tokens refill
 
 
 def log(provider: str, model: str, tokens_in: int, tokens_out: int):

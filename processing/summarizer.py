@@ -1,19 +1,24 @@
 """
-Claude API: summarize articles into structured JSON.
-One call per article. Uses Haiku by default (cheap + fast).
+OpenAI API: summarize articles into structured JSON.
+One call per article. Uses GPT-4o-mini (cheap + fast).
+Temporary swap from Claude while API tokens refill.
 """
+from __future__ import annotations
+
 import json
 import re
-import anthropic
 from datetime import date
+from openai import OpenAI
 
-from config import ANTHROPIC_API_KEY
+from config import OPENAI_API_KEY
 from db import repository as db
 from processing.costs import log, DEFAULT_MODEL
 
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+client = OpenAI(api_key=OPENAI_API_KEY)
 
-# Max content chars sent to Claude, by source tier.
+OPENAI_MODEL = "gpt-4o-mini"
+
+# Max content chars sent to model, by source tier.
 # Tier 3 articles are already Gemini summaries — they need very little context.
 CONTENT_CAP = {1: 3000, 2: 1500, 3: 300}
 
@@ -48,7 +53,7 @@ def _clean_content(raw: str) -> str:
     return _WHITESPACE.sub(' ', text).strip()
 
 
-def summarize_article(article: dict, model: str = DEFAULT_MODEL) -> dict | None:
+def summarize_article(article: dict, model: str = OPENAI_MODEL) -> dict | None:
     """
     Takes a db article row, returns parsed JSON summary dict or None on failure.
     """
@@ -65,19 +70,19 @@ def summarize_article(article: dict, model: str = DEFAULT_MODEL) -> dict | None:
     )
 
     try:
-        response = client.messages.create(
+        response = client.chat.completions.create(
             model=model,
             max_tokens=512,
             messages=[{"role": "user", "content": prompt}],
         )
-        raw = response.content[0].text.strip()
+        raw = response.choices[0].message.content.strip()
 
         # log cost
         log(
-            provider="anthropic",
+            provider="openai",
             model=model,
-            tokens_in=response.usage.input_tokens,
-            tokens_out=response.usage.output_tokens,
+            tokens_in=response.usage.prompt_tokens,
+            tokens_out=response.usage.completion_tokens,
         )
 
         # Strip markdown code fences if present (model sometimes wraps JSON)
@@ -100,7 +105,7 @@ def summarize_article(article: dict, model: str = DEFAULT_MODEL) -> dict | None:
 
 def process_unsummarized(batch_size: int = 50) -> dict:
     """
-    Fetch unsummarized articles, run through Claude, store results.
+    Fetch unsummarized articles, run through GPT-4o-mini, store results.
     Returns counts: {processed, failed}
     """
     articles = db.get_unsummarized_articles(limit=batch_size)
