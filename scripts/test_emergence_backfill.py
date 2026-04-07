@@ -1,13 +1,12 @@
 """
-One-time diagnostic: The Claude Code (OpenClaw) Emergence Story
+One-time diagnostic: validate emergence detection with historical data.
 December 2024 – February 2025
 
-This validates the full pipeline using real historical data.
-UNFOMO should surface Claude Code as an emerging signal in Dec 2024 —
-the thing everyone missed until February.
+Backfills 3 months of AI news and checks whether the emergence detector
+correctly flags 'claude code' as a rising signal before it went mainstream.
 
 NOT part of the daily pipeline. Run manually with:
-  python scripts/validate_emergence_detection.py
+  python scripts/test_emergence_backfill.py
 """
 from db import repository as db
 from ingestion import gemini_search
@@ -37,7 +36,7 @@ def run():
     print(f"      February: {feb_counts}")
 
     # Step 3: Summarize everything
-    print("\n[3/5] Summarizing articles with Claude...")
+    print("\n[3/5] Summarizing articles...")
     # Use a large batch since this is a one-time backfill
     total_processed = 0
     while True:

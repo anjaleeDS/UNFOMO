@@ -30,7 +30,7 @@
 | Task | Priority | Notes |
 |------|----------|-------|
 | **Cleanup + rename pass** | High | Plan written — see `~/.claude/plans/immutable-exploring-elephant.md`. Files to rename, functions to clarify, web assets to move to `web/static/` |
-| **OpenClaw test case** | High | `test_openclaw.py` needs correct dates for when "openclaw" started circulating in the community. Confirm dates with Anja, then move script to `scripts/` folder |
+| **Emergence backfill test** | Medium | `scripts/test_emergence_backfill.py` — run historical backfill to validate emergence detector catches 'claude code' as a rising signal |
 | **Deploy to Railway** | High | Web server + scheduler need to run as Railway services. Add all `.env` keys to Railway variables. Bot polling needs to run 24/7 |
 | **Run first full daily job** | Medium | `python3 scheduler/daily_job.py` — confirm end-to-end with Gemini now that billing is on |
 | **Telegram `/today` command test** | Medium | Confirm polling responds to commands (was working at end of session) |
@@ -85,6 +85,6 @@ All in `.env` (never committed). See `.env.example` for the full list.
 
 ## Open Questions
 
-1. **OpenClaw dates** — when did "openclaw" start circulating in your community? Need this to set the test case query period correctly.
+1. **Emergence backfill** — run `scripts/test_emergence_backfill.py` to validate the detector with Dec 2024 – Feb 2025 data.
 2. **Railway deployment** — do you want the bot polling and scheduler running on Railway, or keep running locally for now?
 3. **Podcast audio** — do you want to enable the Google Cloud TTS key to test podcast generation?
